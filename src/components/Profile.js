@@ -1,19 +1,23 @@
 import React from 'react'
 import {useNavigate} from 'react-router-dom';
 import {Button, Card} from 'react-bootstrap';
-import {useDispatch} from 'react-redux';
-import {logout} from '../action/actions';
-import {useSelector} from 'react-redux';
+import {useUserContext} from '../context/AuthContext';
+import {useFlashContext} from '../context/FlashContext';
 
 function Profile() {
-    const dispatch = useDispatch();
     const navigate = useNavigate();
-    const user = useSelector(state => state.user);
+    const {currentUser, logout} = useUserContext();
+    const {setFlash} = useFlashContext();
 
-    const logoutUser = () => {
-        dispatch(logout());
+    const logoutUser = async () => {
+      try{
+        await logout();
+        setFlash({variant: "success", message:'User logged out!'});
         console.log("USER logged out!");
         navigate('/login');
+      }catch(e){
+        setFlash({variant: "danger", message: `${e.message}`});
+      }         
     }
 
   return (
@@ -21,8 +25,8 @@ function Profile() {
     <Card>
         <Card.Body>
             <h2 style={{textAlign: "center"}}>Profile</h2>
-            <p><b>Email:</b> {user}</p>
-            <Button style={{width: "auto"}} variant="primary" type="submit">Update Profile</Button>
+            <p><b>Email:</b> {currentUser.email}</p>
+            <Button onClick={()=>navigate('/update')} style={{width: "auto"}} variant="primary" type="submit">Update Profile</Button>
         </Card.Body>
     </Card>
     <Button onClick={logoutUser} variant="link">Log Out</Button>
